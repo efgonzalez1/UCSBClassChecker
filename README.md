@@ -9,9 +9,9 @@ Python script for checking if a UCSB class is open. Edit the search.json file to
 
 `python main.py`
 
-You will prompted to login using the password associated with your UMAIL account.
+You will prompted to login using the password associated with your UCSBNetID.
 
-Then this account info will be used for sending the notification email.
+Then this account info will be used for logging into GOLD and later sending the notification email.
 
 No login info is saved, but it is kept in session variables until the program quits.
 
