@@ -3,6 +3,8 @@ UCSBClassChecker
 
 Python script for checking if a UCSB class is open. Edit the search.json file to customize your search.
 
+**NOTE:  This script requires bs4 and mechanize**
+
 **Clone this repo, edit the search.json file, and in your terminal run:**
 
 `python main.py`
