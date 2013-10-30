@@ -34,7 +34,7 @@ To have this script send you a text when a class opens up, use one of these for 
 
 ---    
   
-**About `search.json` file:**
+**About the `search.json` file:**
 
 1. `ucsb_net_id` : Pretty self-explanatory. Don't include the "@umail.ucsb.edu"  
 
