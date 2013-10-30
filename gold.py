@@ -12,20 +12,28 @@ class Gold(object):
         self.quarter = None
         self.user = None
         searches = self.read_search_file("search.json")
-        print("Logging in as: %s" % self.user)
-        self.pw = getpass("UCSB NetID Password: ")
         self.br = mechanize.Browser()
+        self.exit_msg = "\n\nThanks for using the UCSB Class Checker!\n"
+        self.welcome_msg = "UCSB Class Checker (Exit at any time with Ctrl-C)"
+        print("\n%s" % self.welcome_msg)
+        print("%s\n" % ''.join(["=" for i in range(len(self.welcome_msg))]))
 
         while True:
-            self.login()
-            self.search(searches)
-            self.wait()
+            try:
+                self.login()
+                self.search(searches)
+                self.wait()
+            except KeyboardInterrupt:
+                print(self.exit_msg)
+                exit()
 
     def login(self):
         # Sometimes I get random mechanize errors
         # So try to login til successful
         while True:
             try:
+                print("Logging in as: %s" % self.user)
+                self.pw = getpass("UCSB NetID Password: ")
                 self.br.open("https://my.sa.ucsb.edu/gold/Login.aspx")
                 # Select login form
                 self.br.select_form(nr=0)
@@ -37,10 +45,12 @@ class Gold(object):
                 soup = BeautifulSoup(response.read())
                 if soup.title.string == 'Login':
                     print("> Login unsuccessful. Check credentials.\n")
-                    self.__init__()
                 else:
                     print("> Login successful.")
-                break
+                    break
+            except KeyboardInterrupt:
+                print(self.exit_msg)
+                exit()
             except :
                 print("Unexpected error logging in. Trying again...")
 
