@@ -27,7 +27,7 @@ No login info is saved, but it is kept in session variables until the program qu
 **Hint:**
 To have this script send you a text when a class opens up, use one of these for your "notify_email":
 
-    ** T-Mobile: ** 10digitphonenumber@tmomail.net
+* T-Mobile: `10digitphonenumber@tmomail.net`
 * AT&T:  `10digitphonenumber@txt.att.net`
 * Verizon: `10digitphonenumber@vtext.com`
 * Sprint: `10digitphonenumber@messaging.sprintpcs.com`
@@ -43,10 +43,10 @@ To have this script send you a text when a class opens up, use one of these for 
 5. `search_params` : The easiest way to search is to just set the `enroll_code` and leave the rest blank. If you want to use `department` you need to enter the `course_num` as well. You can have more than 5 of those individual searches:
     
 
-      `{
-          "enroll_code" : "31476",
-          "department" : "",
-          "course_num" : ""
-      }`
+      {
+          "enroll_code" : "31476",  
+          "department" : "",  
+          "course_num" : ""  
+      }
 
     Just copy and paste another one into the list.
