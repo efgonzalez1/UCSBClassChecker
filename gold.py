@@ -66,7 +66,7 @@ class Gold(object):
                 else:
                     print("> Login successful.")
                     break
-            except KeyboardInterrupt:
+            except (EOFError, KeyboardInterrupt):
                 print(self.exit_msg)
                 exit()
             except:
@@ -140,8 +140,11 @@ class Gold(object):
                 elif info_dict["Space"] == u"Closed\xa0":
                     print("Class closed. You should search for another class.")
                 elif (float(info_dict["Space"]) / float(info_dict["Max"])) > 0:
-                    print("Class is OPEN! Sending notification...")
-                    self.notify(title)
+                    if self.notify_email:
+                        print("Class is OPEN! Sending notification...")
+                        self.notify(title)
+                    else:
+                        print("Class is OPEN!")
                 else:
                     print("Unknown reason why class is full.")
             except mechanize._form.ControlNotFoundError:
