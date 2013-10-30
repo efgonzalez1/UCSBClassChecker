@@ -11,8 +11,9 @@ class Gold(object):
         self.notify_email = None
         self.quarter = None
         self.user = None
-        self.pw = getpass("UCSB NetID Password: ")
         searches = self.read_search_file("search.json")
+        print("Logging in as: %s" % self.user)
+        self.pw = getpass("UCSB NetID Password: ")
         self.br = mechanize.Browser()
 
         while True:
@@ -135,8 +136,7 @@ class Gold(object):
         check_time = time.asctime(time.localtime(time.time()
                         + self.mins_to_wait*60))
         print("\n> Checking again at:\n> %s\n" % check_time)
-        for i in range(int(self.mins_to_wait*60.0)):
-            time.sleep(1)
+        time.sleep(self.mins_to_wait*60.0)
 
 
 def main():
