@@ -45,6 +45,10 @@ class Gold(object):
                 if not self.pw:
                     print("Logging in as: %s" % self.user)
                     self.pw = getpass("UCSB NetID Password: ")
+                ### EDITS FOR HEROKU COMPATIBILITY ###
+                # Comment out the above 3 lines relating to the "if" statement
+                # Uncomment the following line (NOTE IDK HOW SECURE THIS IS)
+                # self.pw = "ENTER_YOUR_GOLD_PW_HERE"
                 # Open login page, select login form, modify fields, submit
                 self.br.open(LOGIN_URL)
                 self.br.select_form(nr=0)
