@@ -11,12 +11,13 @@ class Gold(object):
         self.notify_email = None
         self.quarter = None
         self.user = None
+        self.pw = None
         searches = self.read_search_file("search.json")
         self.br = mechanize.Browser()
         self.exit_msg = "\n\nThanks for using the UCSB Class Checker!\n"
         self.welcome_msg = "UCSB Class Checker (Exit at any time with Ctrl-C)"
         print("\n%s" % self.welcome_msg)
-        print("%s\n" % ''.join(["=" for i in range(len(self.welcome_msg))]))
+        print("%s" % ''.join(["=" for i in range(len(self.welcome_msg))]))
 
         while True:
             try:
@@ -32,8 +33,9 @@ class Gold(object):
         # So try to login til successful
         while True:
             try:
-                print("Logging in as: %s" % self.user)
-                self.pw = getpass("UCSB NetID Password: ")
+                if not self.pw:
+                    print("Logging in as: %s" % self.user)
+                    self.pw = getpass("UCSB NetID Password: ")
                 self.br.open("https://my.sa.ucsb.edu/gold/Login.aspx")
                 # Select login form
                 self.br.select_form(nr=0)
@@ -45,6 +47,7 @@ class Gold(object):
                 soup = BeautifulSoup(response.read())
                 if soup.title.string == 'Login':
                     print("> Login unsuccessful. Check credentials.\n")
+                    self.pw = None
                 else:
                     print("> Login successful.")
                     break
