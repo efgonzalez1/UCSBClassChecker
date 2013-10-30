@@ -1,11 +1,11 @@
 {
-    "ucsb_net_id": "INSERT_ID",
-    "notify_email": "EMAIL_TO_RECEIVE_NOTIFICATION",
+    "ucsb_net_id": "YOUR_UCSB_NET_ID",
+    "notify_email": "EMAIL_THAT_WILL_RECEIVE_NOTIFICATION",
     "mins_to_wait": "3",
     "quarter": "20141",
     "search_params":
                     [{
-                        "enroll_code" : "43000",
+                        "enroll_code" : "31476",
                         "department" : "",
                         "course_num" : ""
                     },
