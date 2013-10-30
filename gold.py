@@ -1,6 +1,7 @@
 from getpass import getpass
 from bs4 import BeautifulSoup
 import mechanize
+import smtplib
 import time
 import json
 
@@ -106,13 +107,17 @@ class Gold(object):
                 # Execute search and save result page for parsing
                 soup = BeautifulSoup(self.br.submit().read())
                 # Parse results
-                error_page = soup.findAll("span", attrs={"id": "pageContent_messageLabel"})
+                error_page_attrs = {"id": "pageContent_messageLabel"}
+                error_page = soup.findAll("span", attrs=error_page_attrs)
                 if error_page:
                     print("Class not found. Try searching again.")
                     self.search(search_params)
-                class_title = soup.findAll("span", attrs={"class": "tableheader"})
-                info_header = soup.findAll("td", attrs={"class": "tableheader"})[0:7]
-                info_table = soup.findAll("td", attrs={"class": "clcellprimary"})[0:7]
+                class_title_attrs = {"class": "tableheader"}
+                class_title = soup.findAll("span", attrs=class_title_attrs)
+                info_header_attrs = {"class": "tableheader"}
+                info_header = soup.findAll("td", attrs=info_header_attrs)[0:7]
+                info_table_attrs = {"class": "clcellprimary"}
+                info_table = soup.findAll("td", attrs=info_table_attrs)[0:7]
 
                 info_dict = {}
                 for title, detail in zip(info_header, info_table):
@@ -122,10 +127,8 @@ class Gold(object):
                 title = class_title[0].string.replace(u'\xa0', u' ')
                 title = ' '.join(title.split())
                 print("\n%s" % title)
-                s = "="
-                for i in range(len(title)):
-                    s += "="
-                print("%s" % s)
+                # Trick to underline a string with the correct # of =
+                print("%s" % ''.join(["=" for i in range(len(title))]))
 
                 # Check if full
                 if info_dict["Space"] == u"Full\xa0":
@@ -141,14 +144,14 @@ class Gold(object):
                 print("error. skipping for now...\n")
 
     def notify(self, class_title):
-        import smtplib
+        # Send email from your UCSB Umail to some other email that you specify
         fromaddr = self.user + "@umail.ucsb.edu"
         toaddrs = self.notify_email
         msg = "\n[CLASS OPEN!]\n%s" % class_title
-
+        # Use credentials that were previously entered
         username = fromaddr
         password = self.pw
-
+        # UCSB Umail's SMTP server and port
         server = smtplib.SMTP('pod51019.outlook.com:587')
         server.starttls()
         server.login(username, password)
