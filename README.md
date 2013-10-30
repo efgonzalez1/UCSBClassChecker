@@ -25,7 +25,7 @@ No login info is saved, but it is kept in session variables until the program qu
 ---
   
 **Hint:**
-To have this script send you a text when a class opens up, use one of these for your "notify_email":
+To have this script send you a text when a class opens up, use one of these for your `notify_email`:
 
 * T-Mobile: `10digitphonenumber@tmomail.net`
 * AT&T:  `10digitphonenumber@txt.att.net`
@@ -51,3 +51,5 @@ To have this script send you a text when a class opens up, use one of these for 
             "department" : "",   
             "course_num" : ""  
         }  
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/30f2235cab60b1b9f33e8ff546b33641 "githalytics.com")](http://githalytics.com/nando1/UCSBClassChecker)
