@@ -40,10 +40,9 @@ To have this script send you a text when a class opens up, use one of these for 
 
 2. `notify_email` : This is the email that will get a message when a class opens up.  
 
-3. `mins_to_wait` : How long you want to wait before checking again.  
+3. `mins_to_wait` : How long you want to wait before checking GOLD again.  
 
-4. `quarter` : This is a numerical value, internal to UCSB GOLD.  
-    The pattern seems to be YYYY# where # is the quarter number. So Winter 2014 is 20141.  
+4. `quarter` : This is a numerical value, internal to UCSB GOLD. The pattern seems to be YYYY# where # is the quarter number. So Winter 2014 is 20141.  
 
 5. `search_params` : The easiest way to search is to just set the `enroll_code` and leave the rest blank. If you want to use the `department` you need to enter the `course_num` as well. You can have more than 5 of those individual searches. Just copy and paste another one into the list:
   
