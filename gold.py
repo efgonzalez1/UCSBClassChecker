@@ -12,23 +12,31 @@ class Gold(object):
         self.quarter = None
         self.user = None
         self.pw = None
-        searches = self.read_search_file("search.json")
         self.br = mechanize.Browser()
-        self.exit_msg = "\n\nThanks for using the UCSB Class Checker!\n"
         self.welcome_msg = "UCSB Class Checker (Exit at any time with Ctrl-C)"
-        print("\n%s" % self.welcome_msg)
-        print("%s" % ''.join(["=" for i in range(len(self.welcome_msg))]))
+        self.exit_msg = "\n\nThanks for using the UCSB Class Checker!\n"
+        # Read search file to get username on login screen
+        self.search_params = self.read_search_file("search.json")
+        self.start()
 
+    def start(self):
+        print("\n%s" % self.welcome_msg)
+        # Trick to underline my welcome message with the correct # of =
+        print("%s" % ''.join(["=" for i in range(len(self.welcome_msg))]))
         while True:
             try:
                 self.login()
-                self.search(searches)
+                self.search(self.search_params)
                 self.wait()
             except KeyboardInterrupt:
                 print(self.exit_msg)
                 exit()
 
     def login(self):
+        LOGIN_URL = 'https://my.sa.ucsb.edu/gold/Login.aspx'
+        USER_FIELD = 'ctl00$pageContent$userNameText'
+        PW_FIELD = 'ctl00$pageContent$passwordText'
+        CHECKBOX_FIELD = 'ctl00$pageContent$CredentialCheckBox'
         # Sometimes I get random mechanize errors
         # So try to login til successful
         while True:
@@ -36,13 +44,15 @@ class Gold(object):
                 if not self.pw:
                     print("Logging in as: %s" % self.user)
                     self.pw = getpass("UCSB NetID Password: ")
-                self.br.open("https://my.sa.ucsb.edu/gold/Login.aspx")
-                # Select login form
+                # Open login page, select login form, modify fields, submit
+                self.br.open(LOGIN_URL)
                 self.br.select_form(nr=0)
                 form = self.br.form
-                form['ctl00$pageContent$userNameText'] = self.user
-                form['ctl00$pageContent$passwordText'] = self.pw
-                self.br.find_control('ctl00$pageContent$CredentialCheckBox').items[0].selected = True
+                form[USER_FIELD] = self.user
+                form[PW_FIELD] = self.pw
+                # Checkbox has weird way of being set
+                form[CHECKBOX_FIELD] = ['on']
+                # Should not get the login page again after login attempt
                 response = self.br.submit()
                 soup = BeautifulSoup(response.read())
                 if soup.title.string == 'Login':
@@ -54,51 +64,52 @@ class Gold(object):
             except KeyboardInterrupt:
                 print(self.exit_msg)
                 exit()
-            except :
+            except:
                 print("Unexpected error logging in. Trying again...")
 
-
     def read_search_file(self, path):
-        searches = None
+        search_params = None
         with open(path) as f:
             search_file = json.load(f)
             self.user = search_file["ucsb_net_id"]
             self.notify_email = search_file["notify_email"]
             self.mins_to_wait = float(search_file["mins_to_wait"])
             self.quarter = search_file["quarter"]
-            searches = search_file["search_params"]
+            search_params = search_file["search_params"]
 
-        blank = {"enroll_code" : "", "department" : "", "course_num" : ""}
+        blank = {"enroll_code": "", "department": "", "course_num": ""}
         while True:
             try:
-                searches.remove(blank)
+                search_params.remove(blank)
             except ValueError:
                 break
-        return searches
+        return search_params
 
-
-    def search(self, searches):
+    def search(self, search_params):
+        SEARCH_URL = 'https://my.sa.ucsb.edu/gold/CriteriaFindCourses.aspx'
+        QUARTER_FIELD = 'ctl00$pageContent$quarterDropDown'
+        ENROLL_CODE_FIELD = 'ctl00$pageContent$enrollcodeTextBox'
+        DEPARTMENT_FIELD = 'ctl00$pageContent$departmentDropDown'
+        COURSE_NUM_FIELD = 'ctl00$pageContent$courseNumberTextBox'
         print("> Starting search...")
-        for s in searches:
+        for s in search_params:
             try:
-                self.br.open("https://my.sa.ucsb.edu/gold/CriteriaFindCourses.aspx")
+                self.br.open(SEARCH_URL)
                 # Select search form
                 self.br.select_form(nr=0)
                 form = self.br.form
                 # Set search params
-                form['ctl00$pageContent$quarterDropDown'] = [self.quarter]
-                form['ctl00$pageContent$enrollcodeTextBox'] = s['enroll_code']
-                form['ctl00$pageContent$departmentDropDown'] = [s['department']]
-                form['ctl00$pageContent$courseNumberTextBox'] = s['course_num']
-
+                form[QUARTER_FIELD] = [self.quarter]
+                form[ENROLL_CODE_FIELD] = s['enroll_code']
+                form[DEPARTMENT_FIELD] = [s['department']]
+                form[COURSE_NUM_FIELD] = s['course_num']
                 # Execute search and save result page for parsing
                 soup = BeautifulSoup(self.br.submit().read())
-
                 # Parse results
                 error_page = soup.findAll("span", attrs={"id": "pageContent_messageLabel"})
                 if error_page:
                     print("Class not found. Try searching again.")
-                    self.search(searches)
+                    self.search(search_params)
                 class_title = soup.findAll("span", attrs={"class": "tableheader"})
                 info_header = soup.findAll("td", attrs={"class": "tableheader"})[0:7]
                 info_table = soup.findAll("td", attrs={"class": "clcellprimary"})[0:7]
@@ -132,7 +143,7 @@ class Gold(object):
     def notify(self, class_title):
         import smtplib
         fromaddr = self.user + "@umail.ucsb.edu"
-        toaddrs  = self.notify_email
+        toaddrs = self.notify_email
         msg = "\n[CLASS OPEN!]\n%s" % class_title
 
         username = fromaddr
@@ -140,14 +151,14 @@ class Gold(object):
 
         server = smtplib.SMTP('pod51019.outlook.com:587')
         server.starttls()
-        server.login(username,password)
+        server.login(username, password)
         server.sendmail(fromaddr, toaddrs, msg)
         server.quit()
         return self
 
     def wait(self):
-        check_time = time.asctime(time.localtime(time.time()
-                        + self.mins_to_wait*60))
+        raw_time_delta = time.localtime(time.time() + self.mins_to_wait*60)
+        check_time = time.asctime(raw_time_delta)
         print("\n> Checking again at:\n> %s\n" % check_time)
         time.sleep(self.mins_to_wait*60.0)
 
