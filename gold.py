@@ -21,6 +21,8 @@ class Gold(object):
             self.wait()
 
     def login(self):
+        # Sometimes I get random mechanize errors
+        # So try to login til successful
         while True:
             try:
                 self.br.open("https://my.sa.ucsb.edu/gold/Login.aspx")
