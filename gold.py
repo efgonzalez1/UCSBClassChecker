@@ -82,23 +82,16 @@ class Gold(object):
             self.quarter = search_file["quarter"]
             search_params = search_file["search_params"]
 
+        # Remove blank/duplicate searches. Fix department string if necessary
         blank = {"enroll_code": "", "department": "", "course_num": ""}
-        # Remove duplicate searches and fix department string if necessary
         dupe_free_search_params = []
         for item in search_params:
             # Fix department string by appending a space until it is 5 chars
             while (len(item['department']) < 5) and (item['department'] != ''):
                 item['department'] += ' '
-            if item not in dupe_free_search_params:
-                dupe_free_search_params.append(item)
-        # Remove blanks searches
-        # (Couldn't figure out how to remove in one pass with dupes)
-        while True:
-            try:
-                dupe_free_search_params.remove(blank)
-            except ValueError:
-                break
-        return dupe_free_search_params
+            if (item not in dupe_free_search_params) and (item != blank):
+                    dupe_free_search_params.append(item)
+        print(dupe_free_search_params)
 
     def search(self, search_params):
         SEARCH_URL = 'https://my.sa.ucsb.edu/gold/CriteriaFindCourses.aspx'
