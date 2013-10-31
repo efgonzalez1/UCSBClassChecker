@@ -98,7 +98,6 @@ class Gold(object):
                 dupe_free_search_params.remove(blank)
             except ValueError:
                 break
-        print(dupe_free_search_params)
         return dupe_free_search_params
 
     def search(self, search_params):
@@ -160,6 +159,11 @@ class Gold(object):
                     print("Class is full.")
                 elif info_dict["Space"] == u"Closed\xa0":
                     print("Class closed. You should search for another class.")
+                elif (info_dict['Day(s)'] == u'T.B.A.\xa0'):
+                    if (info_dict['Instructor(s)'] == u'T.B.A.\xa0'):
+                        if (info_dict['Time(s)'] == u'T.B.A.\xa0'):
+                            print("This class is not available yet.")
+                            continue
                 elif (float(info_dict["Space"]) / float(info_dict["Max"])) > 0:
                     if self.notify_email:
                         print("Class is OPEN! Sending notification...")
