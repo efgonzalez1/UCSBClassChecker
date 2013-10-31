@@ -2,6 +2,8 @@ from getpass import getpass
 from bs4 import BeautifulSoup
 import mechanize
 import smtplib
+import socket
+import sys
 import time
 import json
 
@@ -18,6 +20,7 @@ class Gold(object):
         self.exit_msg = "\n\nThanks for using the UCSB Class Checker!\n"
         # Read search file to get username on login screen
         self.search_params = self.read_search_file("search.json")
+        self.notified = set()
         self.start()
 
     def start(self):
@@ -97,6 +100,7 @@ class Gold(object):
         DEPARTMENT_FIELD = 'ctl00$pageContent$departmentDropDown'
         COURSE_NUM_FIELD = 'ctl00$pageContent$courseNumberTextBox'
         print("> Starting search...")
+        notifications = set()
         for s in search_params:
             try:
                 self.br.open(SEARCH_URL)
@@ -140,31 +144,47 @@ class Gold(object):
                 elif info_dict["Space"] == u"Closed\xa0":
                     print("Class closed. You should search for another class.")
                 elif (float(info_dict["Space"]) / float(info_dict["Max"])) > 0:
-                    if self.notify_email:
-                        print("Class is OPEN! Sending notification...")
-                        self.notify(title)
-                    else:
-                        print("Class is OPEN!")
+                    print("Class is OPEN!")
+                    if title not in self.notified:
+                        notifications.add(title)
                 else:
                     print("Unknown reason why class is full.")
             except mechanize._form.ControlNotFoundError:
                 print("error. skipping for now...\n")
+        if notifications and self.notify_email:
+            sys.stdout.write("Sending notification(s)...")
+            sys.stdout.flush()
+            if self.notify(sorted(notifications)):
+                self.notified.update(notifications)
 
-    def notify(self, class_title):
+    def notify(self, class_titles):
         # Send email from your UCSB Umail to some other email that you specify
         fromaddr = self.user + "@umail.ucsb.edu"
         toaddrs = self.notify_email
-        msg = "\n[CLASS OPEN!]\n%s" % class_title
+        msg = ("Subject: UCSBClassChecker: Clases Open!\n\nClasses:\n * {}"
+               .format("\n * ".join(class_titles)))
         # Use credentials that were previously entered
         username = fromaddr
         password = self.pw
+        reason = None
         # UCSB Umail's SMTP server and port
-        server = smtplib.SMTP('pod51019.outlook.com:587')
-        server.starttls()
-        server.login(username, password)
-        server.sendmail(fromaddr, toaddrs, msg)
-        server.quit()
-        return self
+        try:
+            server = smtplib.SMTP('pod51019.outlook.com:587', timeout=16)
+            server.starttls()
+            server.login(username, password)
+            server.sendmail(fromaddr, toaddrs, msg)
+            server.quit()
+            print("sent")
+        except smtplib.SMTPRecipientsRefused:
+            reason = "Invalid notify email address"
+            self.notify_email = None  # Prevent future failures
+        except smtplib.SMTPException as exc:
+            reason = str(exc)
+        except socket.gaierror as exc:
+            reason = 'Invalid SMTP server'
+        if reason:
+            print("failed to send: {}".format(reason))
+        return reason is None
 
     def wait(self):
         raw_time_delta = time.localtime(time.time() + self.mins_to_wait*60)
