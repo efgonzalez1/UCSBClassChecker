@@ -87,7 +87,7 @@ class Gold(object):
         dupe_free_search_params = []
         for item in search_params:
             # Fix department string by appending a space until it is 5 chars
-            while len(item['department']) < 5:
+            while (len(item['department']) < 5) and (item['department'] != ''):
                 item['department'] += ' '
             if item not in dupe_free_search_params:
                 dupe_free_search_params.append(item)
@@ -157,8 +157,10 @@ class Gold(object):
                 # Check if full
                 if info_dict["Space"] == u"Full\xa0":
                     print("Class is full.")
+                    continue
                 elif info_dict["Space"] == u"Closed\xa0":
-                    print("Class closed. You should search for another class.")
+                    print("Class is closed.")
+                    continue
                 elif (info_dict['Day(s)'] == u'T.B.A.\xa0'):
                     if (info_dict['Instructor(s)'] == u'T.B.A.\xa0'):
                         if (info_dict['Time(s)'] == u'T.B.A.\xa0'):
@@ -170,11 +172,12 @@ class Gold(object):
                         self.notify(title)
                     else:
                         print("Class is OPEN!")
+                    continue
                 else:
                     print("Unknown reason why class is full.")
             except (mechanize._form.ControlNotFoundError,
                     mechanize._form.ItemNotFoundError):
-                print("error. skipping for now...\n")
+                print("Unknown error. Skipping for now...\n")
 
     def notify(self, class_title):
         # Send email from your UCSB Umail to some other email that you specify
