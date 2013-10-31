@@ -114,8 +114,8 @@ class Gold(object):
                 error_page_attrs = {"id": "pageContent_messageLabel"}
                 error_page = soup.findAll("span", attrs=error_page_attrs)
                 if error_page:
-                    print("Class not found. Try searching again.")
-                    self.search(search_params)
+                    print("Class not found. Will try again next time.")
+                    continue
                 class_title_attrs = {"class": "tableheader"}
                 class_title = soup.findAll("span", attrs=class_title_attrs)
                 info_header_attrs = {"class": "tableheader"}
