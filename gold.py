@@ -83,12 +83,23 @@ class Gold(object):
             search_params = search_file["search_params"]
 
         blank = {"enroll_code": "", "department": "", "course_num": ""}
+        # Remove duplicate searches and fix department string if necessary
+        dupe_free_search_params = []
+        for item in search_params:
+            # Fix department string by appending a space until it is 5 chars
+            while len(item['department']) < 5:
+                item['department'] += ' '
+            if item not in dupe_free_search_params:
+                dupe_free_search_params.append(item)
+        # Remove blanks searches
+        # (Couldn't figure out how to remove in one pass with dupes)
         while True:
             try:
-                search_params.remove(blank)
+                dupe_free_search_params.remove(blank)
             except ValueError:
                 break
-        return search_params
+        print(dupe_free_search_params)
+        return dupe_free_search_params
 
     def search(self, search_params):
         SEARCH_URL = 'https://my.sa.ucsb.edu/gold/CriteriaFindCourses.aspx'
@@ -97,6 +108,15 @@ class Gold(object):
         DEPARTMENT_FIELD = 'ctl00$pageContent$departmentDropDown'
         COURSE_NUM_FIELD = 'ctl00$pageContent$courseNumberTextBox'
         print("> Starting search...")
+        # Hack to work around lack of javascript in mechanize #
+        self.br.open(SEARCH_URL)
+        # Select search form
+        self.br.select_form(nr=0)
+        form = self.br.form
+        # Set search params
+        form[QUARTER_FIELD] = [self.quarter]
+        self.br.submit().read()
+        # #
         for s in search_params:
             try:
                 self.br.open(SEARCH_URL)
@@ -108,6 +128,7 @@ class Gold(object):
                 form[ENROLL_CODE_FIELD] = s['enroll_code']
                 form[DEPARTMENT_FIELD] = [s['department']]
                 form[COURSE_NUM_FIELD] = s['course_num']
+                # print(form)
                 # Execute search and save result page for parsing
                 soup = BeautifulSoup(self.br.submit().read())
                 # Parse results
@@ -147,7 +168,8 @@ class Gold(object):
                         print("Class is OPEN!")
                 else:
                     print("Unknown reason why class is full.")
-            except mechanize._form.ControlNotFoundError:
+            except (mechanize._form.ControlNotFoundError,
+                    mechanize._form.ItemNotFoundError):
                 print("error. skipping for now...\n")
 
     def notify(self, class_title):
