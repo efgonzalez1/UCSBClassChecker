@@ -34,10 +34,10 @@ class Gold(object):
                 exit()
 
     def login(self):
-        LOGIN_URL = 'https://my.sa.ucsb.edu/gold/Login.aspx'
+        LOGIN_URL = 'https://my.sa.ucsb.edu/gold/login.aspx'
         USER_FIELD = 'ctl00$pageContent$userNameText'
         PW_FIELD = 'ctl00$pageContent$passwordText'
-        CHECKBOX_FIELD = 'ctl00$pageContent$CredentialCheckBox'
+        # CHECKBOX_FIELD = 'ctl00$pageContent$CredentialCheckBox'
         # Sometimes I get random mechanize errors
         # So try to login til successful
         while True:
@@ -56,7 +56,7 @@ class Gold(object):
                 form[USER_FIELD] = self.user
                 form[PW_FIELD] = self.pw
                 # Checkbox has weird way of being set
-                form[CHECKBOX_FIELD] = ['on']
+                # form[CHECKBOX_FIELD] = ['on']
                 # Should not get the login page again after login attempt
                 response = self.br.submit()
                 soup = BeautifulSoup(response.read())
